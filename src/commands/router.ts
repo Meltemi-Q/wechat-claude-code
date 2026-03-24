@@ -9,6 +9,7 @@ export interface CommandContext {
   updateSession: (partial: Partial<Session>) => void;
   clearSession: () => Session;
   getChatHistoryText?: (limit?: number) => string;
+  rejectPendingPermission?: () => boolean;
   text: string;
 }
 

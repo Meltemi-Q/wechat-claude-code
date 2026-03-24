@@ -1,9 +1,16 @@
 import { loadJson, saveJson } from './store.js';
-import { mkdirSync } from 'fs';
+import { mkdirSync } from 'node:fs';
 import { DATA_DIR } from './constants.js';
-import { join } from 'path';
+import { join } from 'node:path';
+import { logger } from './logger.js';
 
 const SESSIONS_DIR = join(DATA_DIR, 'sessions');
+
+function validateAccountId(accountId: string): void {
+  if (!/^[a-zA-Z0-9_.@=-]+$/.test(accountId)) {
+    throw new Error(`Invalid accountId: "${accountId}"`);
+  }
+}
 
 export type SessionState = 'idle' | 'processing' | 'waiting_permission';
 
@@ -34,10 +41,12 @@ const DEFAULT_MAX_HISTORY = 100;
 
 export function createSessionStore() {
   function getSessionPath(accountId: string): string {
+    validateAccountId(accountId);
     return join(SESSIONS_DIR, `${accountId}.json`);
   }
 
   function load(accountId: string): Session {
+    validateAccountId(accountId);
     const session = loadJson<Session>(getSessionPath(accountId), {
       workingDirectory: process.cwd(),
       state: 'idle',

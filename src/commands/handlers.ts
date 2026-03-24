@@ -39,6 +39,8 @@ export function handleHelp(_args: string): CommandResult {
 }
 
 export function handleClear(ctx: CommandContext): CommandResult {
+  // Reject any pending permission to avoid orphaned promise corrupting new session
+  ctx.rejectPendingPermission?.();
   const newSession = ctx.clearSession();
   Object.assign(ctx.session, newSession);
   return { reply: '✅ 会话已清除，下次消息将开始新会话。', handled: true };
@@ -118,15 +120,18 @@ export function handleSkills(): CommandResult {
   return { reply: `📋 已安装的 Skill (${skills.length}):\n\n${lines.join('\n')}`, handled: true };
 }
 
+const MAX_HISTORY_LIMIT = 100;
+
 export function handleHistory(ctx: CommandContext, args: string): CommandResult {
   const limit = args ? parseInt(args, 10) : 20;
   if (isNaN(limit) || limit <= 0) {
     return { reply: '用法: /history [数量]\n例: /history 50（显示最近50条对话）', handled: true };
   }
+  const effectiveLimit = Math.min(limit, MAX_HISTORY_LIMIT);
 
-  const historyText = ctx.getChatHistoryText?.(limit) || '暂无对话记录';
+  const historyText = ctx.getChatHistoryText?.(effectiveLimit) || '暂无对话记录';
 
-  return { reply: `📝 对话记录（最近${limit}条）:\n\n${historyText}`, handled: true };
+  return { reply: `📝 对话记录（最近${effectiveLimit}条）:\n\n${historyText}`, handled: true };
 }
 
 export function handleUnknown(cmd: string, args: string): CommandResult {

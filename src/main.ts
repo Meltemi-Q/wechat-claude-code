@@ -293,6 +293,7 @@ async function handleMessage(
       updateSession,
       clearSession: () => sessionStore.clear(account.accountId),
       getChatHistoryText: (limit?: number) => sessionStore.getChatHistoryText(session, limit),
+      rejectPendingPermission: () => permissionBroker.rejectPending(account.accountId),
       text: userText,
     };
 

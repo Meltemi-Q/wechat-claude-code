@@ -117,14 +117,15 @@ export async function waitForQrScan(qrcodeId: string): Promise<AccountData> {
       default:
         logger.warn('Unknown QR status', { status: data.status, retmsg: data.retmsg });
         // Surface error to user for known failure statuses
-        if (data.status && (
-          data.status.includes('not_support') ||
-          data.status.includes('version') ||
-          data.status.includes('forbid') ||
-          data.status.includes('reject') ||
-          data.status.includes('cancel')
+        const status = data.status ?? '';
+        if (status && (
+          status.includes('not_support') ||
+          status.includes('version') ||
+          status.includes('forbid') ||
+          status.includes('reject') ||
+          status.includes('cancel')
         )) {
-          throw new Error(`二维码扫描失败: ${data.retmsg || data.status}`);
+          throw new Error(`二维码扫描失败: ${data.retmsg || status}`);
         }
         if (data.retmsg) {
           throw new Error(`二维码扫描失败: ${data.retmsg}`);
